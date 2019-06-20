@@ -12,13 +12,19 @@
 #define BAUD_RATE 9600
 #define SERIAL_NAME "/dev/ttyACM0"
 
-int serial_set_interface(int fd, int speed);    //This is the function to set correctly the serial attributes
-int serial_open(const char* name);              //This is the function to open the serial port
-int read_from_fd(int fd, char* buf);            //This is the function to read the serial port
-int write_on_fd(int fd, const char* message);   //This is the function to write on the serial port
-void clean_buffer(char* s);                     //This is the function to clean the buffer
-int delay(long milliseconds);                   //This is a function to wait the time necessary for Arduino to write on the serial
 
+int serial_set_interface(int fd, int speed);                            //This is the function to set correctly the serial attributes
+int serial_open(const char* name);                                      //This is the function to open the serial port
+int read_from_fd(int fd, char* buf);                                    //This is the function to read the serial port
+int write_on_fd(int fd, const char* message);                           //This is the function to write on the serial port
+void clean_buffer(char* s);                                             //This is the function to clean the buffer
+int delay(long milliseconds);                                           //This is a function to wait the time necessary for Arduino to write on the serial
+unsigned char calculateLRC(char *buf, int lengh);                       //This is the function to calculate the checksum (see Wikipedia for more details of LRC)
+void serialize(char* src, char* dest, int ch);                          //This is the function to serialize the struct
+int deserialize(char* src, char* aux_s, char* aux_i);                   //This is the function to transform the serailized string in the struct
+void welcome_print();                                                   //This is the function that expains more or less how the application works to the user
+
+//probably to delete
 void clean_buffer(char* s){
     int i = 0;
     while(i < strlen((char*) s)){
@@ -29,6 +35,64 @@ void clean_buffer(char* s){
 
 int delay(long milliseconds){
     usleep(milliseconds * 1000 ); // sleep milliseconds
+}
+
+void welcome_print(){
+    printf("Hi! Welcome to Plant Guardian, a software to watch over your plant and be sure everything's ok.\n\nYou can use one of the following commands:\n- \"Read temperature sensor\" to see the temperature of the air your plant is breathing;\n- \"Read humidity sensor\" to see the wetness of the soil;\n- \"Read photosensor\" to see the amount of light in the enviroment;\n- \"Log\" to see the last two mesurements of the sensors;\n- \"quit\" to exit.\n\nWe hope Plant Guardian will be usefulto you. If your plant is suffering you'll receive a message on the console.\n\n");
+}
+
+unsigned char calculateLRC(char *buf, int lengh){
+    unsigned char checksum = 0;
+    while (lengh > 0){
+        checksum += *buf++;
+        lengh--;
+    }
+    return ((~checksum)+1);
+}
+
+void serialize(char* src, char* dest, int ch){      //dest will always be at least as long as src
+    int i = 0;
+    while(src[i] != '\n'){
+        dest[i] = src[i];
+        i++;
+    }
+    dest[i] = '$';  //it separates the string from the checksum
+    i++;       
+    sprintf(dest+i, "%d", ch);
+
+    if (ch < 10)
+        i++;
+    else if (ch < 100)
+        i += 2;
+    else if (ch < 1000)
+        i += 3;
+    else 
+        i += 4;
+
+    dest[i] = '\n';
+}
+
+int deserialize(char* src, char* aux_s, char* aux_i){
+    int i = 0;
+    while(src[i] != '$'){
+        aux_s[i] = src[i];
+        //printf("aux_s[i] = %c ", aux_s[i]);
+        i++;
+    }
+    aux_s[i] = '\n';
+    //printf("aux_s = %s ", aux_s);
+    i++;
+    int k = 0;
+    while(src[i] != '\n'){
+        aux_i[k] = src[i];
+        //printf("aux_i[k] = %c ", aux_i[k]);
+        i++;
+        k++;
+    }
+    aux_i[k] = '\0';
+    //printf("aux_i = %s ", aux_i);
+    return atoi(aux_i);
+    //number =  atoi(aux_i); this doesn't work for some mysterious reason
 }
 
 int serial_set_interface_attribs(int fd, int speed){

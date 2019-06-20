@@ -25,20 +25,19 @@
 # to be uploaded on the avr
 # you can add multiple files, they will be all generated
 
-BINS=uart.elf 
+BINS=Arduino.elf 
 
 # put here the additional .o files you want to generate
 # one .c file for each .o should be present
 OBJS=
 
 # put here the additional header files needed for compilation
-HEADERS=
+HEADERS=Arduino.h
 
 # the file below contains the actual rules
 
 include ../avr_common/avr.mk
 
 # !!!!!!!!!!!!!!!! MODIFY HERE !!!!!!!!!!!!!!!! 
-
 
 
