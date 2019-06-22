@@ -14,7 +14,6 @@ int main(int argc, char* argv[]){
 
     //setting up quit_command
     char* quit_command = QUIT_COMMAND;
-    size_t quit_command_len = strlen(quit_command);
 
     //opening corectly the serial port
     fd = serial_open("/dev/ttyACM0");
@@ -45,27 +44,41 @@ int main(int argc, char* argv[]){
         ret = write_on_fd(fd, to_PlantGuardian);
         delay(1000);
 
-        //clean the buffers
-        memset(buf, 0, BUF_LEN);
-        memset(to_PlantGuardian, 0, BUF_LEN);
+        //receive data according to what I asked
+        do {
+            //clean the buffers
+            memset(buf, 0, BUF_LEN);
+            memset(to_PlantGuardian, 0, BUF_LEN);
 
-        printf("Buffer clean: %s\n", buf);
+            printf("Buffer clean: %s\n", buf);
 
-        read_from_fd(fd, buf);
-        delay(1000);
-        printf("Message received: %s",buf);
+            read_from_fd(fd, buf);
+            delay(1000);
+            printf("Message received: %s",buf);
 
-        checksum_received = deserialize(buf, to_PlantGuardian, aux_checksum);
-        checksum = calculateLRC(to_PlantGuardian, strlen(to_PlantGuardian));
-        printf("Deserialized struct: string = %s, checksum_receive = %d, checksum calculated = %d\n", to_PlantGuardian, checksum_received, checksum);
-        if (checksum_received == checksum)
-            printf("Trasmission occurred without errors!\n");
-        else 
-            printf("The checksum sent and received are not the same: an error occured durnig trasmission\n");
+            checksum_received = deserialize(buf, to_PlantGuardian, aux_checksum);
+            checksum = calculateLRC(to_PlantGuardian, strlen(to_PlantGuardian));
+            printf("Deserialized struct: string = %s, checksum_receive = %d, checksum calculated = %d\n", to_PlantGuardian, checksum_received, checksum);
+            if (checksum_received == checksum)
+                printf("Trasmission occurred without errors!\n");
+            else 
+                printf("The checksum sent and received are not the same: an error occured durnig trasmission\n");
+            
+            //Exiting the loop after receiving quit_command
+            if (strcmp(to_PlantGuardian, quit_command) == 0) 
+            break; 
+        } while (strcmp(to_PlantGuardian, NEW_COMMAND) != 0);
 
-        //Exiting the loop after receiving quit_command
-        if (!memcmp(buf, quit_command, quit_command_len)) break; 
+        //Exiting the second loop too after receiving quit_command
+        if (strcmp(to_PlantGuardian, quit_command) == 0) 
+            break; 
     }
 
+    if (close(fd) < 0){
+        fprintf(stderr, "[Error %d while closing the serial file descriptor %d", errno, fd);
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Thank you for using our service. Bye bye!\n");
     exit(EXIT_SUCCESS);
 }

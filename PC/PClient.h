@@ -7,7 +7,8 @@
 #include <unistd.h>
 #include <stdint.h>
 
-#define QUIT_COMMAND    "quit"
+#define QUIT_COMMAND "quit\n"
+#define NEW_COMMAND  "[PlantGuardian]: Ready for a new command\n"
 #define BUF_LEN 256
 #define BAUD_RATE 9600
 #define SERIAL_NAME "/dev/ttyACM0"

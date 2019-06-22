@@ -9,7 +9,9 @@
 #define MYUBRR (F_CPU/16/BAUD-1)
 #define MAX_BUF 256
 #define ERROR "[PlantGuardian]: An error occurred in transmission, please try again\n"
+#define INVALID_COMMAND "[PlantGuardian]: Sorry, the command you gave is invalid\n"
 #define ACK "[PlantGuardina]: Message received\n"
+#define NEW_COMMAND "[PlantGuardian]: Ready for a new command\n"
 
 //probably to delete
 void clean_buffer(uint8_t* s){
