@@ -6,6 +6,7 @@
 #include <string.h>
 #include <avr/interrupt.h>
 #include "sensor.h"
+#include "plant_guardian.h"
 
 #define BAUD 9600
 #define MYUBRR (F_CPU/16/BAUD-1)

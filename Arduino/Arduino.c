@@ -9,6 +9,7 @@ int checksum;
 int checksum_received;
 char aux_checksum[5];
 char cSREG; //to store the Status Register during interrupts (must be handled by software)
+DataStruct s_data;
 
 
 //let's try receiving the serial interrupt
@@ -175,6 +176,15 @@ int main(void){
     UART_init();    //also enables interrupt RX
     sei();          //set Global Interrupt Enable to 1 so that interrupts can be handled
 
-    while (1);  //necessary, otherwise the main is too short and the ISR isn't execute
+    //main loop where periodic measurements are taken (to be tested)
+    while (1){
+
+        s_data.hum = hum_sensor_read_();
+        s_data.photo = photo_sensor_read_();
+        s_data.tmp = tmp_sensor_read_();
+
+        //store in EEPROM
+
+    };  //necessary, otherwise the main is too short and the ISR isn't execute
 
 }
