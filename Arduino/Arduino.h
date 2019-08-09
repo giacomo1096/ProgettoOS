@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <avr/io.h>
 #include <string.h>
+#include <avr/interrupt.h>
+#include "sensor.h"
 
 #define BAUD 9600
 #define MYUBRR (F_CPU/16/BAUD-1)
@@ -12,6 +14,7 @@
 #define INVALID_COMMAND "[PlantGuardian]: Sorry, the command you gave is invalid\n"
 #define ACK "[PlantGuardina]: Message received\n"
 #define NEW_COMMAND "[PlantGuardian]: Ready for a new command\n"
+#define RESULT "[PlantGuardia]: Sensor read: \n"
 
 //probably to delete
 void clean_buffer(uint8_t* s){
@@ -35,7 +38,7 @@ void UART_init(void){
 
 void UART_putChar(uint8_t c){
   // wait for transmission completed, looping on status bit
-  while ( !(UCSR0A & (1<<UDRE0)) );
+  while ( !(UCSR0A & (1<<UDRE0)) ); 
 
   // Start transmission
   UDR0 = c;
@@ -43,7 +46,7 @@ void UART_putChar(uint8_t c){
 
 uint8_t UART_getChar(void){
   // Wait for incoming data, looping on status bit
-  while ( !(UCSR0A & (1<<RXC0)) );
+  while ( !(UCSR0A & (1<<RXC0)) ); 
   
   // Return the data
   return UDR0;
@@ -131,4 +134,25 @@ int deserialize(char* src, char* aux_s, char* aux_i){
     //printf("aux_i = %s ", aux_i);
     return atoi(aux_i);
     //number =  atoi(aux_i); this doesn't work for some mysterious reason
+}
+
+void serialize_sensor(char* src, char* dest, uint16_t ch){      //dest will always be at least as long as src
+    int i = 0;
+    while(src[i] != '\n'){
+        dest[i] = src[i];
+        i++;
+    }
+       
+    sprintf(dest+i, "%d", ch);
+
+    if (ch < 10)
+        i++;
+    else if (ch < 100)
+        i += 2;
+    else if (ch < 1000)
+        i += 3;
+    else 
+        i += 4;
+
+    dest[i] = '\n';
 }

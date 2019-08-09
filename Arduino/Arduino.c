@@ -1,35 +1,20 @@
 #include "Arduino.h"
 
 uint8_t buf[MAX_BUF];
+uint16_t sensor;
 char toPClient[MAX_BUF];
 char commandToProcess[MAX_BUF];
+char output_result[MAX_BUF];
 int checksum;
+int checksum_received;
 char aux_checksum[5];
+char cSREG; //to store the Status Register during interrupts (must be handled by software)
 
-int main(void){
-    int checksum_received;
 
-    //setting up ERROR
-    char* error = ERROR;
-    //size_t error_len = strlen(ERROR);
+//let's try receiving the serial interrupt
+ISR(USART0_RX_vect, ISR_BLOCK){
 
-    //setting up ACK
-    char* ack = ACK;
-    size_t ack_len = strlen(ACK);
-
-    //setting up INVALID_COMMAND
-    char* invalid_command = INVALID_COMMAND;
-    size_t invalid_command_len = strlen(invalid_command);
-
-    //setting up NEW_COMMAND
-    char* new_command = NEW_COMMAND;
-    size_t new_command_len = strlen(NEW_COMMAND);
-
-    UART_init();
-
-    //main loop (dovrebbe partire ogni volta che arriva un interrupt dalla seriale)
-    while(1) {
-        //clean the buffers
+    //clean the buffers
         memset(buf, 0, MAX_BUF);
         memset(commandToProcess, 0, MAX_BUF);
         memset(toPClient, 0, MAX_BUF);
@@ -45,10 +30,18 @@ int main(void){
         //UART_putString((uint8_t*) toPClient); //to debug
 
         if (checksum != checksum_received){
-            serialize(error, toPClient, checksum_received);  //it sends the checksum_received to the client to let it see the error
+            serialize(ERROR, toPClient, checksum_received);  //it sends the checksum_received to the client to let it see the error
             UART_putString((uint8_t*) toPClient);
             //receiving ERROR will trigger in the client the response: insert a new command
-            continue;
+            //continue;
+
+            //telling the client to send a new command because the one it sent wasn't processable
+            memset(toPClient, 0, MAX_BUF);
+
+            checksum = calculateLRC(NEW_COMMAND, strlen(NEW_COMMAND));
+            serialize(NEW_COMMAND, toPClient, checksum);
+
+            UART_putString((uint8_t*)toPClient);
         }
         else {
             
@@ -57,28 +50,69 @@ int main(void){
             memset(toPClient, 0, MAX_BUF);
 
             //sending ACK
-            checksum = calculateLRC(ack, ack_len);
-            serialize(ack, toPClient, checksum);
+            checksum = calculateLRC(ACK, strlen(ACK));
+            serialize(ACK, toPClient, checksum);
             UART_putString((uint8_t*)toPClient);
 
             //the command received is correct, so let's process it 
             if (strcmp(commandToProcess, "Read humidity sensor\n") == 0){
 
+                /*sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
-                //funzione umidità
+                memset(output_result, 0, MAX_BUF);
+
+                cSREG = SREG;
+                cli(); //disable interrupts 
+                sensor = hum_sensor_read_();
+                SREG = cSREG;
+                sei(); //enable interrupts
+
+                serialize_sensor(result, output_result, sensor);
+
+                checksum = calculateLRC(output_result, strlen(output_result));
+                serialize(output_result, toPClient, checksum);
+                UART_putString((uint8_t*) toPClient);*/
+
                 UART_putString((uint8_t*) "Output humidity funtion\n"); //for now (the client will go in segmentation fault)
             }
             else if (strcmp(commandToProcess, "Read temperature sensor\n") == 0){
 
+                /*sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
-                //funzione temperatura
-                UART_putString((uint8_t*) "Started temperature function\n"); //for now (the client will go in segmentation fault)
+                memset(output_result, 0, MAX_BUF);
+                
+                cSREG = SREG;
+                cli();
+                sensor = tmp_sensor_read_();
+                SREG = cSREG;
+                sei();
+
+                serialize_sensor(result, output_result, sensor);
+
+                checksum = calculateLRC(output_result, strlen(output_result));
+                serialize(output_result, toPClient, checksum);
+                UART_putString((uint8_t*) toPClient);*/
+
+                //to debug: UART_putString((uint8_t*) "Started temperature function\n"); //for now (the client will go in segmentation fault)
             }
             else if(strcmp(commandToProcess, "Read photosensor\n") == 0){
 
+                /*sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
-                //funzione fotosensore
-                UART_putString((uint8_t*) "Started photosensor function\n"); //for now (the client will go in segmentation fault)
+                memset(output_result, 0, MAX_BUF);
+
+                cSREG = SREG;
+                cli();
+                sensor = photo_sensor_read_();
+                SREG = cSREG;
+                sei();
+                serialize_sensor(result, output_result, sensor);
+
+                checksum = calculateLRC(output_result, strlen(output_result));
+                serialize(output_result, toPClient, checksum);
+                UART_putString((uint8_t*) toPClient);*/
+
+                //to debug: UART_putString((uint8_t*) "Started photosensor function\n"); //for now (the client will go in segmentation fault)
             }
             else if (strcmp(commandToProcess, "Log\n") == 0){
 
@@ -88,24 +122,59 @@ int main(void){
             }
             else if (strcmp(commandToProcess, "quit\n") == 0){
                 UART_putString(buf);
-                break;
+                //break;
             } 
             else {
                 
                 memset(toPClient, 0, MAX_BUF);
 
-                checksum = calculateLRC(invalid_command, invalid_command_len);
-                serialize(invalid_command, toPClient, checksum);
+                checksum = calculateLRC(INVALID_COMMAND, strlen(INVALID_COMMAND));
+                serialize(INVALID_COMMAND, toPClient, checksum);
                 UART_putString((uint8_t*) toPClient);
             }
 
             //telling the client to send a new command
             memset(toPClient, 0, MAX_BUF);
 
-            checksum = calculateLRC(new_command, new_command_len);
-            serialize(new_command, toPClient, checksum);
+            checksum = calculateLRC(NEW_COMMAND, strlen(NEW_COMMAND));
+            serialize(NEW_COMMAND, toPClient, checksum);
 
             UART_putString((uint8_t*)toPClient);
         }
-    }
+}
+
+int main(void){
+
+    //let's prepare the sensors to do their job
+    adc_init();
+    tmp_sensor_init();
+    hum_sensor_init();
+    photo_sensor_init();
+
+    //Questi dovranno essere cancellati se non sono utili
+    /*//setting up ERROR
+    char* error = ERROR;
+    //size_t error_len = strlen(ERROR);
+
+    //setting up ACK
+    char* ack = ACK;
+    size_t ack_len = strlen(ACK);
+
+    //setting up INVALID_COMMAND
+    char* invalid_command = INVALID_COMMAND;
+    size_t invalid_command_len = strlen(invalid_command);
+
+    //setting up NEW_COMMAND
+    char* new_command = NEW_COMMAND;
+    size_t new_command_len = strlen(NEW_COMMAND);
+
+    //setting up RESULT    da fare ancora nel codice
+    char* result = RESULT;
+    //size_t result_len = strlen(RESULT); probably won't be needed*/
+
+    UART_init();    //also enables interrupt RX
+    sei();          //set Global Interrupt Enable to 1 so that interrupts can be handled
+
+    while (1);  //necessary, otherwise the main is too short and the ISR isn't execute
+
 }
