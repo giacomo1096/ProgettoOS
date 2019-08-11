@@ -11,6 +11,30 @@ char aux_checksum[5];
 char cSREG; //to store the Status Register during interrupts (must be handled by software)
 DataStruct s_data;
 
+/*------- EEPROM---------*/
+
+DataStruct EEMEM data_log[LOG_SIZE];
+int current_eeprom_index = 0;
+
+void EEPROM_write_data(DataStruct* data){
+
+    eeprom_busy_wait();
+    
+    eeprom_write_block((const void*)data, (DataStruct*)&data_log[current_eeprom_index], DATA_STRUCT_LEN);
+
+    current_eeprom_index = (current_eeprom_index+1)%LOG_SIZE;
+    
+}
+
+//reads block from eeprom at address src
+void EEPROM_read_data_block(DataStruct* data, int src_addr){
+
+    eeprom_busy_wait();
+
+    eeprom_read_block(data, (DataStruct*)&data_log[src_addr], DATA_STRUCT_LEN);
+    
+}
+
 
 //let's try receiving the serial interrupt
 ISR(USART0_RX_vect, ISR_BLOCK){

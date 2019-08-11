@@ -9,29 +9,7 @@
 #include "components.h"
 #include "eeprom_manager.h"
 
-/*------- EEPROM---------*/
 
-DataStruct EEMEM data_log[LOG_SIZE];
-int current_eeprom_index = 0;
-
-void EEPROM_write_data(DataStruct* data){
-
-	eeprom_busy_wait();
-	
-	eeprom_write_block((const void*)data, (DataStruct*)&data_log[current_eeprom_index], DATA_STRUCT_LEN);
-
-	current_eeprom_index = (current_eeprom_index+1)%LOG_SIZE;
-	
-}
-
-//reads block from eeprom at address src
-void EEPROM_read_data_block(DataStruct* data, int src_addr){
-
-	eeprom_busy_wait();
-
-	eeprom_read_block(data, (DataStruct*)&data_log[src_addr], DATA_STRUCT_LEN);
-	
-}
 
 
 
@@ -70,8 +48,11 @@ uint16_t tmp_sensor_read_() {
   return (((uint16_t) hb) << 8) | lb;
 }
 
+uint16_t tmp_sensor_read(){
+	tmp_sensor_init();
+	return tmp_sensor_read_();
+}
 
- 
 
 /*--------- photoresistance ----------*/
 
@@ -96,7 +77,10 @@ uint16_t photo_sensor_read_(){
 
 }
 
-
+uint16_t photo_sensor_read(){
+	photo_sensor_init();
+	return photo_sensor_read_();
+}
 /*--------------humidity sensor ----------*/
 
 void hum_sensor_init(){
@@ -117,3 +101,35 @@ uint16_t hum_sensor_read_(){
 
   return (((uint16_t) hb) << 8) | lb;
 }
+
+uint16_t hum_sensor_read(){
+	hum_sensor_init();
+	return hum_sensor_read_();
+}
+
+/*------------- servo motor -----------*/
+
+void servo_init(){
+
+  	//servo settings	
+  	PORTB |= (1<<SERVO_PIN);  							
+  	DDRB |= (1<<SERVO_PIN);
+
+  	//pwm settings
+  	ICR1=20000;
+  	OCR1A=1000; 								
+  	TCCR1A=(1<<COM1A1);									
+
+  	TCCR1B=(1<<WGM13)|(1<<CS11);  
+
+}
+
+void servo_open(){
+	OCR1A = 550;
+}
+
+void servo_close(){
+	OCR1A = 2200;
+}
+
+
