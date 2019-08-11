@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <avr/io.h>
 #include <string.h>
+#include <avr/io.h>
 #include <avr/interrupt.h>
 #include "sensor.h"
 #include "plant_guardian.h"
@@ -13,9 +13,12 @@
 #define MAX_BUF 256
 #define ERROR "[PlantGuardian]: An error occurred in transmission, please try again\n"
 #define INVALID_COMMAND "[PlantGuardian]: Sorry, the command you gave is invalid\n"
-#define ACK "[PlantGuardina]: Message received\n"
+#define ACK "[PlantGuardian]: Message received\n"
 #define NEW_COMMAND "[PlantGuardian]: Ready for a new command\n"
-#define RESULT "[PlantGuardia]: Sensor read: \n"
+#define RESULT "[PlantGuardian]: Sensor read: \n"
+#define EEPROM_STRING_1 "[Plant Guardian]: Temperature: \n"
+#define EEPROM_STRING_2 " Humidity: \n"
+#define EEPROM_STRING_3 " Light: \n"
 
 //probably to delete
 void clean_buffer(uint8_t* s){
@@ -25,6 +28,10 @@ void clean_buffer(uint8_t* s){
         i++;
     }
 }
+
+/*(long milliseconds){      //DA AGGIUSTARE
+    _delay_ms(milliseconds * 1000 ); // sleep milliseconds
+}*/
 
 //serial functions
 void UART_init(void){
@@ -137,20 +144,58 @@ int deserialize(char* src, char* aux_s, char* aux_i){
     //number =  atoi(aux_i); this doesn't work for some mysterious reason
 }
 
-void serialize_sensor(char* src, char* dest, uint16_t ch){      //dest will always be at least as long as src
+void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t tmp, uint16_t hum, uint16_t photo){      //dest will always be at least as long as src
     int i = 0;
-    while(src[i] != '\n'){
-        dest[i] = src[i];
+    int j = 0;
+    int k = 0;
+
+    while(src1[i] != '\n'){
+        dest[i] = src1[i];
         i++;
     }
        
-    sprintf(dest+i, "%d", ch);
+    sprintf(dest+i, "%d", tmp);
 
-    if (ch < 10)
+    if (tmp < 10)
         i++;
-    else if (ch < 100)
+    else if (tmp < 100)
         i += 2;
-    else if (ch < 1000)
+    else if (tmp < 1000)
+        i += 3;
+    else 
+        i += 4;
+
+    
+    while(src2[j] != '\n'){
+        dest[i] = src2[j];
+        i++;
+        j++;
+    }
+       
+    sprintf(dest+i, "%d", hum);
+
+    if (hum < 10)
+        i++;
+    else if (hum < 100)
+        i += 2;
+    else if (hum < 1000)
+        i += 3;
+    else 
+        i += 4;
+
+    while(src3[k] != '\n'){
+        dest[i] = src3[k];
+        i++;
+        k++;
+    }
+       
+    sprintf(dest+i, "%d", photo);
+
+    if (photo < 10)
+        i++;
+    else if (photo < 100)
+        i += 2;
+    else if (photo < 1000)
         i += 3;
     else 
         i += 4;

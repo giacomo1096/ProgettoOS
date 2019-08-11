@@ -7,9 +7,11 @@ char commandToProcess[MAX_BUF];
 char output_result[MAX_BUF];
 int checksum;
 int checksum_received;
+int EEPROM_index;
 char aux_checksum[5];
 char cSREG; //to store the Status Register during interrupts (must be handled by software)
-DataStruct s_data;
+DataStruct* w_data;
+DataStruct* r_data;
 
 /*------- EEPROM---------*/
 
@@ -141,13 +143,23 @@ ISR(USART0_RX_vect, ISR_BLOCK){
             }
             else if (strcmp(commandToProcess, "Log\n") == 0){
 
-                memset(toPClient, 0, MAX_BUF);
-                //funzione log
-                UART_putString((uint8_t*) "Started log function\n"); //for now (the client will go in segmentation fault)
+                for (EEPROM_index = current_eeprom_index-5; EEPROM_index < current_eeprom_index; EEPROM_index++){
+                    memset(r_data, 0, sizeof(*r_data));
+                    memset(toPClient, 0, MAX_BUF);
+                    memset(output_result, 0, MAX_BUF);
+
+                    EEPROM_read_data_block(r_data, EEPROM_index);
+
+                    serialize_EEPROM(EEPROM_STRING_1, EEPROM_STRING_2, EEPROM_STRING_3, output_result, (*r_data).tmp, (*r_data).hum, (*r_data).photo);
+                    checksum = calculateLRC(output_result, strlen(output_result));
+                    serialize(output_result, toPClient, checksum);
+                    UART_putString((uint8_t*) toPClient);
+                }
+                EEPROM_index = 0;
             }
             else if (strcmp(commandToProcess, "quit\n") == 0){
+
                 UART_putString(buf);
-                //break;
             } 
             else {
                 
@@ -176,6 +188,9 @@ int main(void){
     hum_sensor_init();
     photo_sensor_init();
 
+    w_data = (DataStruct*) malloc(sizeof(DataStruct));
+    r_data = (DataStruct*) malloc(sizeof(DataStruct));
+
     //Questi dovranno essere cancellati se non sono utili
     /*//setting up ERROR
     char* error = ERROR;
@@ -203,12 +218,21 @@ int main(void){
     //main loop where periodic measurements are taken (to be tested)
     while (1){
 
-        s_data.hum = hum_sensor_read_();
-        s_data.photo = photo_sensor_read_();
-        s_data.tmp = tmp_sensor_read_();
+        memset(w_data, 0, sizeof(*w_data));
 
-        //store in EEPROM
+        /*w_data.hum = hum_sensor_read_();
+        w_data.photo = photo_sensor_read_();
+        w_data.tmp = tmp_sensor_read_();*/
 
-    };  //necessary, otherwise the main is too short and the ISR isn't execute
+        //for testing
+        (*w_data).hum = 100;
+        (*w_data).tmp = 21;
+        (*w_data).photo = 6;
+
+        EEPROM_write_data(w_data);
+
+        //delay(1000);
+
+    };  
 
 }

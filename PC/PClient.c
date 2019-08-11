@@ -24,6 +24,8 @@ int main(int argc, char* argv[]){
 
     //client main loop
     while(1){
+
+        white();
         printf("Please insert command for PlantGuardian: "); 
 
         //clean the buffers
@@ -36,6 +38,7 @@ int main(int argc, char* argv[]){
             exit(EXIT_FAILURE);
         }
 
+        printf("\n");
         green();
         printf("This is the command I received: %s\n", buf); 
 
