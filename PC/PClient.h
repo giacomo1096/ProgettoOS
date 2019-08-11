@@ -24,6 +24,10 @@ unsigned char calculateLRC(char *buf, int lengh);                       //This i
 void serialize(char* src, char* dest, int ch);                          //This is the function to serialize the struct
 int deserialize(char* src, char* aux_s, char* aux_i);                   //This is the function to transform the serailized string in the struct
 void welcome_print();                                                   //This is the function that expains more or less how the application works to the user
+void white();                                                           //This is the function that sets printf color to white (default)
+void cyan();                                                            //This is the function that sets printf color to cyan
+void blue();                                                            //This is the function that sets printf color to blue
+void green();                                                           //This is the function that sets printf color to green 
 
 //probably to delete
 void clean_buffer(char* s){
@@ -192,4 +196,20 @@ int write_on_fd(int fd, const char* message){
         }
     }
     return things_written;
+}
+
+void white() {
+    printf("\033[0m");
+}
+
+void cyan() {
+    printf("\033[1;36m");
+}
+
+void blue() {
+    printf("\033[0;34m");
+}
+
+void green() {
+    printf("\033[0;32m");
 }
