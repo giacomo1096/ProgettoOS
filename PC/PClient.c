@@ -35,7 +35,9 @@ int main(int argc, char* argv[]){
             fprintf(stderr, "Sorry, an error occured while reading your command. I'm exiting...\n");
             exit(EXIT_FAILURE);
         }
-        printf("This is the command I received: %s\n", buf); //temporary, to debug
+
+        green();
+        printf("This is the command I received: %s\n", buf); 
 
         checksum = calculateLRC(buf, strlen(buf));
         serialize(buf, to_PlantGuardian, checksum);
@@ -50,20 +52,26 @@ int main(int argc, char* argv[]){
             memset(buf, 0, BUF_LEN);
             memset(to_PlantGuardian, 0, BUF_LEN);
 
-            printf("Buffer clean: %s\n", buf);
+            green();
+            printf("Buffer clean: %s\n\n", buf);
 
             read_from_fd(fd, buf);
             delay(1000);
+
+            blue();
             printf("Message received: %s",buf);
 
             checksum_received = deserialize(buf, to_PlantGuardian, aux_checksum);
             checksum = calculateLRC(to_PlantGuardian, strlen(to_PlantGuardian));
-            printf("Deserialized struct: string = %s, checksum_receive = %d, checksum calculated = %d\n", to_PlantGuardian, checksum_received, checksum);
+            printf("Deserialized struct: string = %s, checksum_received = %d, checksum calculated = %d\n", to_PlantGuardian, checksum_received, checksum);
             if (checksum_received == checksum)
-                printf("Trasmission occurred without errors!\n");
+                printf("Trasmission occurred without errors!\n\n");
             else 
-                printf("The checksum sent and received are not the same: an error occured durnig trasmission\n");
+                printf("The checksum sent and received are not the same: an error occured durnig trasmission\n\n");
             
+            cyan();
+            printf("%s\n", to_PlantGuardian);
+
             //Exiting the loop after receiving quit_command
             if (strcmp(to_PlantGuardian, quit_command) == 0) 
             break; 
@@ -79,6 +87,7 @@ int main(int argc, char* argv[]){
         exit(EXIT_FAILURE);
     }
 
+    white();
     printf("Thank you for using our service. Bye bye!\n");
     exit(EXIT_SUCCESS);
 }
