@@ -29,21 +29,12 @@ void cyan();                                                            //This i
 void blue();                                                            //This is the function that sets printf color to blue
 void green();                                                           //This is the function that sets printf color to green 
 
-//probably to delete
-void clean_buffer(char* s){
-    int i = 0;
-    while(i < strlen((char*) s)){
-        s[i] = 0;
-        i++;
-    }
-}
-
 int delay(long milliseconds){
     usleep(milliseconds * 1000 ); // sleep milliseconds
 }
 
 void welcome_print(){
-    printf("Hi! Welcome to Plant Guardian, a software to watch over your plant and be sure everything's ok.\n\nYou can use one of the following commands:\n- \"Read temperature sensor\" to see the temperature of the air your plant is breathing;\n- \"Read humidity sensor\" to see the wetness of the soil;\n- \"Read photosensor\" to see the amount of light in the enviroment;\n- \"Log\" to see the last two mesurements of the sensors;\n- \"quit\" to exit.\n\nWe hope Plant Guardian will be usefulto you. If your plant is suffering you'll receive a message on the console.\n\n");
+    printf("Hi! Welcome to Plant Guardian, a software to watch over your plant and be sure everything's ok.\n\nYou can use one of the following commands:\n- \"Read temperature sensor\" to see the temperature of the air your plant is breathing;\n- \"Read humidity sensor\" to see the wetness of the soil;\n- \"Read photosensor\" to see the amount of light in the enviroment;\n- \"Log\" to see the measurements made by the sensors;\n- \"quit\" to exit.\n\nWe hope Plant Guardian will be usefulto you.\n\n");
 }
 
 unsigned char calculateLRC(char *buf, int lengh){

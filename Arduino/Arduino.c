@@ -60,7 +60,6 @@ ISR(USART0_RX_vect, ISR_BLOCK){
             serialize(ERROR, toPClient, checksum_received);  //it sends the checksum_received to the client to let it see the error
             UART_putString((uint8_t*) toPClient);
             //receiving ERROR will trigger in the client the response: insert a new command
-            //continue;
 
             //telling the client to send a new command because the one it sent wasn't processable
             memset(toPClient, 0, MAX_BUF);
@@ -84,7 +83,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
             //the command received is correct, so let's process it 
             if (strcmp(commandToProcess, "Read humidity sensor\n") == 0){
 
-                /*sensor = 0;
+                sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
                 memset(output_result, 0, MAX_BUF);
 
@@ -98,13 +97,13 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
-                UART_putString((uint8_t*) toPClient);*/
+                UART_putString((uint8_t*) toPClient);
 
-                UART_putString((uint8_t*) "Output humidity funtion\n"); //for now (the client will go in segmentation fault)
+                //UART_putString((uint8_t*) "Output humidity funtion\n"); //for now (the client will go in segmentation fault)
             }
             else if (strcmp(commandToProcess, "Read temperature sensor\n") == 0){
 
-                /*sensor = 0;
+                sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
                 memset(output_result, 0, MAX_BUF);
                 
@@ -118,13 +117,13 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
-                UART_putString((uint8_t*) toPClient);*/
+                UART_putString((uint8_t*) toPClient);
 
                 //to debug: UART_putString((uint8_t*) "Started temperature function\n"); //for now (the client will go in segmentation fault)
             }
             else if(strcmp(commandToProcess, "Read photosensor\n") == 0){
 
-                /*sensor = 0;
+                sensor = 0;
                 memset(toPClient, 0, MAX_BUF);
                 memset(output_result, 0, MAX_BUF);
 
@@ -137,7 +136,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
-                UART_putString((uint8_t*) toPClient);*/
+                UART_putString((uint8_t*) toPClient);
 
                 //to debug: UART_putString((uint8_t*) "Started photosensor function\n"); //for now (the client will go in segmentation fault)
             }
@@ -191,27 +190,6 @@ int main(void){
     w_data = (DataStruct*) malloc(sizeof(DataStruct));
     r_data = (DataStruct*) malloc(sizeof(DataStruct));
 
-    //Questi dovranno essere cancellati se non sono utili
-    /*//setting up ERROR
-    char* error = ERROR;
-    //size_t error_len = strlen(ERROR);
-
-    //setting up ACK
-    char* ack = ACK;
-    size_t ack_len = strlen(ACK);
-
-    //setting up INVALID_COMMAND
-    char* invalid_command = INVALID_COMMAND;
-    size_t invalid_command_len = strlen(invalid_command);
-
-    //setting up NEW_COMMAND
-    char* new_command = NEW_COMMAND;
-    size_t new_command_len = strlen(NEW_COMMAND);
-
-    //setting up RESULT    da fare ancora nel codice
-    char* result = RESULT;
-    //size_t result_len = strlen(RESULT); probably won't be needed*/
-
     UART_init();    //also enables interrupt RX
     sei();          //set Global Interrupt Enable to 1 so that interrupts can be handled
 
@@ -220,18 +198,18 @@ int main(void){
 
         memset(w_data, 0, sizeof(*w_data));
 
-        /*w_data.hum = hum_sensor_read_();
+        w_data.hum = hum_sensor_read_();
         w_data.photo = photo_sensor_read_();
-        w_data.tmp = tmp_sensor_read_();*/
+        w_data.tmp = tmp_sensor_read_();
 
         //for testing
-        (*w_data).hum = 100;
-        (*w_data).tmp = 21;
-        (*w_data).photo = 6;
+        //(*w_data).hum = 100;
+        //(*w_data).tmp = 21;
+        //(*w_data).photo = 6;
 
         EEPROM_write_data(w_data);
 
-        //delay(1000);
+        _delay_ms(3000);
 
     };  
 

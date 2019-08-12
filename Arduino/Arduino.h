@@ -20,19 +20,6 @@
 #define EEPROM_STRING_2 " Humidity: \n"
 #define EEPROM_STRING_3 " Light: \n"
 
-//probably to delete
-void clean_buffer(uint8_t* s){
-    int i = 0;
-    while(i < MAX_BUF){
-        s[i] = 0;
-        i++;
-    }
-}
-
-/*(long milliseconds){      //DA AGGIUSTARE
-    _delay_ms(milliseconds * 1000 ); // sleep milliseconds
-}*/
-
 //serial functions
 void UART_init(void){
   // Set baud rate
@@ -147,7 +134,7 @@ int deserialize(char* src, char* aux_s, char* aux_i){
 void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t tmp, uint16_t hum, uint16_t photo){      //dest will always be at least as long as src
     int i = 0;
     int j = 0;
-    int k = 0;
+    int k = 0; 
 
     while(src1[i] != '\n'){
         dest[i] = src1[i];
@@ -165,6 +152,10 @@ void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t t
     else 
         i += 4;
 
+    dest[i] = ' ';      //it has to be written like this otherwise the compiler gives an internal error
+    i++;
+    dest[i] = 'C';
+    i++;
     
     while(src2[j] != '\n'){
         dest[i] = src2[j];
@@ -183,6 +174,11 @@ void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t t
     else 
         i += 4;
 
+    dest[i] = ' ';
+    i++;
+    dest[i] = '%';
+    i++;
+
     while(src3[k] != '\n'){
         dest[i] = src3[k];
         i++;
@@ -199,6 +195,11 @@ void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t t
         i += 3;
     else 
         i += 4;
+
+    dest[i] = ' ';
+    i++;
+    dest[i] = '%';
+    i++;
 
     dest[i] = '\n';
 }
