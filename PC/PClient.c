@@ -49,6 +49,29 @@ int main(int argc, char* argv[]){
         ret = write_on_fd(fd, to_PlantGuardian);
         delay(1000);
 
+        //verify I receive the checksum
+
+        //clean the buffers
+            memset(buf, 0, BUF_LEN);
+            memset(to_PlantGuardian, 0, BUF_LEN);
+
+            green();
+            printf("Buffer clean: %s\n\n", buf);
+
+            read_from_fd(fd, buf);
+            delay(1000);
+
+            blue();
+            printf("Message received: %s",buf);
+
+            checksum_received = deserialize(buf, to_PlantGuardian, aux_checksum);
+            checksum = calculateLRC(to_PlantGuardian, strlen(to_PlantGuardian));
+            printf("Deserialized struct: string = %s, checksum_received = %d, checksum calculated = %d\n", to_PlantGuardian, checksum_received, checksum);
+            if (checksum_received == 142)   //we know 142 is che ACK's checksum
+                printf("Trasmission occurred without errors!\nChecksum received!\n\n");
+            else 
+                printf("The checksum sent and received are not the same: an error occured durnig trasmission\n\n");
+
         //receive data according to what I asked
         do {
             //clean the buffers

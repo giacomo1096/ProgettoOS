@@ -131,6 +131,27 @@ int deserialize(char* src, char* aux_s, char* aux_i){
     //number =  atoi(aux_i); this doesn't work for some mysterious reason
 }
 
+void serialize_sensor(char* src, char* dest, uint16_t ch){      //dest will always be at least as long as src
+    int i = 0;
+    while(src[i] != '\n'){
+        dest[i] = src[i];
+        i++;
+    }
+
+    sprintf(dest+i, "%d", ch);
+
+    if (ch < 10)
+        i++;
+    else if (ch < 100)n
+        i += 2;
+    else if (ch < 1000)
+        i += 3;
+    else 
+        i += 4;
+
+    dest[i] = '\n';
+}
+
 void serialize_EEPROM(char* src1, char* src2, char* src3, char* dest, uint16_t tmp, uint16_t hum, uint16_t photo){      //dest will always be at least as long as src
     int i = 0;
     int j = 0;
