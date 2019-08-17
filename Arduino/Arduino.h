@@ -142,7 +142,7 @@ void serialize_sensor(char* src, char* dest, uint16_t ch){      //dest will alwa
 
     if (ch < 10)
         i++;
-    else if (ch < 100)n
+    else if (ch < 100)
         i += 2;
     else if (ch < 1000)
         i += 3;
