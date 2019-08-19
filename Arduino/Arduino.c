@@ -93,7 +93,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
                 SREG = cSREG;
                 sei(); //enable interrupts
 
-                //serialize_sensor(RESULT, output_result, sensor);
+                serialize_sensor(RESULT, output_result, sensor);
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
@@ -113,7 +113,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
                 SREG = cSREG;
                 sei();
 
-                //serialize_sensor(RESULT, output_result, sensor);
+                serialize_sensor(RESULT, output_result, sensor);
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
@@ -132,7 +132,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
                 sensor = photo_sensor_read_();
                 SREG = cSREG;
                 sei();
-                //serialize_sensor(RESULT, output_result, sensor);
+                serialize_sensor(RESULT, output_result, sensor);
 
                 checksum = calculateLRC(output_result, strlen(output_result));
                 serialize(output_result, toPClient, checksum);
@@ -149,7 +149,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                     EEPROM_read_data_block(r_data, EEPROM_index);
 
-                    //serialize_EEPROM(EEPROM_STRING_1, EEPROM_STRING_2, EEPROM_STRING_3, output_result, (*r_data).tmp, (*r_data).hum, (*r_data).photo);
+                    serialize_EEPROM(EEPROM_STRING_1, EEPROM_STRING_2, EEPROM_STRING_3, output_result, (*r_data).tmp, (*r_data).hum, (*r_data).photo);
                     checksum = calculateLRC(output_result, strlen(output_result));
                     serialize(output_result, toPClient, checksum);
                     UART_putString((uint8_t*) toPClient);
@@ -198,16 +198,16 @@ int main(void){
 
         memset(w_data, 0, sizeof(*w_data));
 
-        //(*w_data).hum = hum_sensor_read_();
-        //(*w_data).photo = photo_sensor_read_();
-        //(*w_data).tmp = tmp_sensor_read_();
+        (*w_data).hum = hum_sensor_read_();
+        (*w_data).photo = photo_sensor_read_();
+        (*w_data).tmp = tmp_sensor_read_();
 
         //for testing
         //(*w_data).hum = 100;
         //(*w_data).tmp = 21;
         //(*w_data).photo = 6;
 
-        //EEPROM_write_data(w_data);
+        EEPROM_write_data(w_data);
 
         _delay_ms(3000);
 
