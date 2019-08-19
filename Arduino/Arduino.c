@@ -89,7 +89,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                 cSREG = SREG;
                 cli(); //disable interrupts 
-                sensor = hum_sensor_read_();
+                sensor = hum_sensor_read();
                 SREG = cSREG;
                 sei(); //enable interrupts
 
@@ -109,7 +109,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
                 
                 cSREG = SREG;
                 cli();
-                sensor = tmp_sensor_read_();
+                sensor = tmp_sensor_read();
                 SREG = cSREG;
                 sei();
 
@@ -129,7 +129,7 @@ ISR(USART0_RX_vect, ISR_BLOCK){
 
                 cSREG = SREG;
                 cli();
-                sensor = photo_sensor_read_();
+                sensor = photo_sensor_read();
                 SREG = cSREG;
                 sei();
                 serialize_sensor(RESULT, output_result, sensor);
@@ -198,9 +198,9 @@ int main(void){
 
         memset(w_data, 0, sizeof(*w_data));
 
-        (*w_data).hum = hum_sensor_read_();
-        (*w_data).photo = photo_sensor_read_();
-        (*w_data).tmp = tmp_sensor_read_();
+        (*w_data).hum = hum_sensor_read();
+        (*w_data).photo = photo_sensor_read();
+        (*w_data).tmp = tmp_sensor_read();
 
         //for testing
         //(*w_data).hum = 100;
