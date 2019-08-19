@@ -16,6 +16,17 @@
 
 /*-----------------------------------------FUNCTIONS TO SET AND USE SENSORS------------------------------------*/
 
+/*---------------------------------aux functions----------------------------------------------*/
+
+uint16_t map(long x, long in_min, long in_max, long out_min, long out_max){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+uint16_t temp_converter(int temp){
+  double x =  (temp/ 1024.0) * 5.0;
+  double y = (x-0.5)*100;
+  return y;
+}
 /*--------- analog sensors (both temperature and photoresistance) -----------------*/
 
 void adc_init(void) {
@@ -48,9 +59,10 @@ uint16_t tmp_sensor_read_() {
   return (((uint16_t) hb) << 8) | lb;
 }
 
-uint16_t tmp_sensor_read(){
+uint16_t tmp_sensor_read(void){
 	tmp_sensor_init();
-	return tmp_sensor_read_();
+	uint16_t res =  tmp_sensor_read_();
+  	return temp_converter(res);
 }
 
 
@@ -77,9 +89,10 @@ uint16_t photo_sensor_read_(){
 
 }
 
-uint16_t photo_sensor_read(){
+uint16_t photo_sensor_read(void){
 	photo_sensor_init();
-	return photo_sensor_read_();
+	uint16_t res = photo_sensor_read_();
+  	return map(res, 0, 1024, 0, 100);
 }
 /*--------------humidity sensor ----------*/
 
@@ -102,9 +115,10 @@ uint16_t hum_sensor_read_(){
   return (((uint16_t) hb) << 8) | lb;
 }
 
-uint16_t hum_sensor_read(){
+uint16_t hum_sensor_read(void){
 	hum_sensor_init();
-	return hum_sensor_read_();
+	uint16_t res=  hum_sensor_read_();
+	return (100 - map(res, 0, 1024, 0, 100));
 }
 
 /*------------- servo motor -----------*/
